@@ -1,9 +1,9 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const session = require('express-session')
-const routes = require('./router/friends.js')
+const session = require('express-session');
+const routes = require('./router/friends.js');
 
-let users = []
+let users = [];
 
 // Check if a user with the given username already exists
 const doesExist = (username) => {
@@ -35,7 +35,11 @@ const authenticatedUser = (username, password) => {
 
 const app = express();
 
-app.use(session({secret:"fingerpint"},resave=true,saveUninitialized=true));
+app.use(session({
+    secret: "fingerprint",
+    resave: false,
+    saveUninitialized: false
+}));
 
 app.use(express.json());
 
@@ -74,7 +78,7 @@ app.post("/login", (req, res) => {
         // Generate JWT access token
         let accessToken = jwt.sign({
             data: password
-        }, 'access', { expiresIn: 60 * 60 });
+        }, 'access', { expiresIn: 60 });
 
         // Store access token and username in session
         req.session.authorization = {
@@ -96,19 +100,18 @@ app.post("/register", (req, res) => {
         // Check if the user does not already exist
         if (!doesExist(username)) {
             // Add the new user to the users array
-            users.push({"username": username, "password": password});
-            return res.status(200).json({message: "User successfully registered. Now you can login"});
+            users.push({ "username": username, "password": password });
+            return res.status(200).json({ message: "User successfully registered. Now you can login" });
         } else {
-            return res.status(404).json({message: "User already exists!"});
+            return res.status(404).json({ message: "User already exists!" });
         }
     }
     // Return error if username or password is missing
-    return res.status(404).json({message: "Unable to register user."});
+    return res.status(404).json({ message: "Unable to register user." });
 });
 
-
-const PORT =5000;
+const PORT = 5000;
 
 app.use("/friends", routes);
 
-app.listen(PORT,()=>console.log("Server is running"));
+app.listen(PORT, () => console.log("Server is running"));
